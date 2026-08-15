@@ -41,26 +41,17 @@
             position: relative;
         }
 
-        /* 3. Paint Canvas Overlay */
-        #paintCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none;     /* Allows mouse/touch clicks to pass through */
-            z-index: 1;               /* Sits behind text, above background */
-        }
-
-        /* 4. Section Containers */
+        /* 3. Section Containers */
         .first-fold,
         .second-fold {
             height: 100vh;
             width: 100%;
             position: relative;
-            z-index: 2;
         }
 
-        /* 5. Draggable Containers */
-        .draggable {
+        /* 4. Centered Layout Units */
+        .logo-unit,
+        .projects-section {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -70,21 +61,12 @@
             align-items: center;
             gap: 2px;
             
-            cursor: grab;
-            user-select: none;
-            -webkit-user-drag: none;
-            touch-action: none;
-            
             /* Fade-in Animation */
             opacity: 0;
             animation: fadeIn 2.5s ease-out forwards;
         }
 
-        .draggable:active {
-            cursor: grabbing;
-        }
-
-        /* 6. Universal Text Styling (12px, Bold, Italic) */
+        /* 5. Universal Text Styling (12px, Bold, Italic) */
         .site-title,
         .keyword,
         a.contact-link,
@@ -101,8 +83,20 @@
             transition: opacity 0.2s ease;
         }
 
+        /* ONLY subtext.works is draggable */
         .site-title {
             margin-bottom: 4px;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-drag: none;
+            touch-action: none;
+            position: relative;
+            z-index: 5;
+            display: inline-block;
+        }
+
+        .site-title:active {
+            cursor: grabbing;
         }
 
         .keyword {
@@ -154,11 +148,11 @@
         }
 
         /* Hover interactions */
-        .draggable:hover .site-title,
-        .draggable:hover .keyword,
-        .draggable:hover a.contact-link,
-        .draggable:hover .projects-title,
-        .draggable:hover .projects-list span {
+        .logo-unit:hover .site-title,
+        .logo-unit:hover .keyword,
+        .logo-unit:hover a.contact-link,
+        .projects-section:hover .projects-title,
+        .projects-section:hover .projects-list span {
             opacity: 1;
         }
 
@@ -187,21 +181,97 @@
             opacity: 0.8;
         }
 
+        /* 6. Minimalist Scroll Indicator Arrow */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-color);
+            font-size: 12px;
+            font-style: italic;
+            opacity: 0.5;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            animation: bounce 2s infinite;
+            user-select: none;
+            z-index: 10;
+        }
+
+        .scroll-indicator:hover {
+            opacity: 1;
+        }
+
+        /* 7. Bottom Color Slider Styling */
+        .color-slider-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            opacity: 0.4;
+            transition: opacity 0.2s ease;
+        }
+
+        .color-slider-container:hover {
+            opacity: 1;
+        }
+
+        input[type=range].color-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 80px;
+            height: 2px;
+            background: var(--text-color);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type=range].color-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-color);
+            cursor: pointer;
+        }
+
+        input[type=range].color-slider::-moz-range-thumb {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-color);
+            border: none;
+            cursor: pointer;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; filter: blur(5px); }
             to { opacity: 1; filter: blur(0px); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(4px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(2px);
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Paint Trail Canvas -->
-    <canvas id="paintCanvas"></canvas>
-
     <!-- First Fold -->
-    <div class="first-fold">
-        <div class="draggable logo-unit">
-            <span class="site-title">subtext.works</span>
+    <div class="first-fold" id="top">
+        <div class="logo-unit">
+            <!-- Only subtext.works is draggable -->
+            <span class="site-title" id="draggable-title">subtext.works</span>
             
             <!-- 1. Strategic Advisory -->
             <div class="keyword-wrapper">
@@ -239,11 +309,14 @@
 
             <a href="mailto:contact@subtext.works" class="contact-link">contact</a>
         </div>
+
+        <!-- Minimalist Scroll Down Indicator -->
+        <div class="scroll-indicator" id="scrollArrow">↓</div>
     </div>
 
     <!-- Second Fold (Below First Scroll) -->
-    <div class="second-fold">
-        <div class="draggable projects-section">
+    <div class="second-fold" id="projects">
+        <div class="projects-section">
             <p class="projects-title">projects & partners include:</p>
             <div class="projects-list">
                 <span>ark journal</span>
@@ -259,150 +332,102 @@
         </div>
     </div>
 
+    <!-- Fixed Bottom Right Background Color Slider -->
+    <div class="color-slider-container">
+        <input type="range" id="bgSlider" class="color-slider" min="0" max="100" value="0">
+    </div>
+
     <script>
         // ------------------------------------
-        // Paint Canvas Setup
+        // Smooth Scroll Arrow Action
         // ------------------------------------
-        const canvas = document.getElementById('paintCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function initCanvas() {
-            const dpr = window.devicePixelRatio || 1;
-            const width = Math.max(document.documentElement.clientWidth, window.innerWidth);
-            const height = Math.max(document.documentElement.scrollHeight, window.innerHeight * 2);
-
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-            canvas.style.width = width + 'px';
-            canvas.style.height = height + 'px';
-
-            ctx.scale(dpr, dpr);
-            ctx.strokeStyle = '#ebd15b';  /* Yellow color */
-            ctx.lineWidth = 6;            /* Smooth brush width */
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-        }
-
-        window.addEventListener('load', initCanvas);
-        window.addEventListener('resize', initCanvas);
-
-        // ------------------------------------
-        // Drag & Paint Logic
-        // ------------------------------------
-        function makeDraggable(elem) {
-            let isDragging = false;
-            let startX, startY, initialLeft, initialTop;
-            let prevX, prevY;
-            let hasMoved = false;
-
-            function getElementCenter() {
-                const rect = elem.getBoundingClientRect();
-                return {
-                    x: rect.left + window.scrollX + rect.width / 2,
-                    y: rect.top + window.scrollY + rect.height / 2
-                };
-            }
-
-            function startDrag(e) {
-                isDragging = true;
-                hasMoved = false;
-
-                const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-                const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-
-                startX = clientX;
-                startY = clientY;
-
-                const parent = elem.offsetParent || document.body;
-                const parentRect = parent.getBoundingClientRect();
-                const elemRect = elem.getBoundingClientRect();
-
-                initialLeft = elemRect.left - parentRect.left;
-                initialTop = elemRect.top - parentRect.top;
-
-                elem.style.transform = 'none';
-                elem.style.left = initialLeft + 'px';
-                elem.style.top = initialTop + 'px';
-
-                const center = getElementCenter();
-                prevX = center.x;
-                prevY = center.y;
-
-                document.addEventListener('mousemove', drag);
-                document.addEventListener('touchmove', drag, { passive: false });
-                document.addEventListener('mouseup', stopDrag);
-                document.addEventListener('touchend', stopDrag);
-            }
-
-            function drag(e) {
-                if (!isDragging) return;
-
-                const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-                const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-
-                const deltaX = clientX - startX;
-                const deltaY = clientY - startY;
-
-                if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
-                    hasMoved = true;
-                }
-
-                if (e.cancelable) e.preventDefault();
-
-                elem.style.left = (initialLeft + deltaX) + 'px';
-                elem.style.top = (initialTop + deltaY) + 'px';
-
-                const currentCenter = getElementCenter();
-
-                ctx.beginPath();
-                ctx.moveTo(prevX, prevY);
-                ctx.lineTo(currentCenter.x, currentCenter.y);
-                ctx.stroke();
-
-                prevX = currentCenter.x;
-                prevY = currentCenter.y;
-            }
-
-            function stopDrag() {
-                isDragging = false;
-                document.removeEventListener('mousemove', drag);
-                document.removeEventListener('touchmove', drag);
-                document.removeEventListener('mouseup', stopDrag);
-                document.removeEventListener('touchend', stopDrag);
-            }
-
-            elem.addEventListener('click', (e) => {
-                if (hasMoved) {
-                    e.preventDefault();
-                }
+        document.getElementById('scrollArrow').addEventListener('click', () => {
+            window.scrollTo({
+                top: window.innerHeight,
+                behavior: 'smooth'
             });
+        });
 
-            elem.addEventListener('mousedown', startDrag);
-            elem.addEventListener('touchstart', startDrag, { passive: false });
+        // ------------------------------------
+        // Background Color Gradient Interpolation
+        // ------------------------------------
+        const slider = document.getElementById('bgSlider');
+        slider.addEventListener('input', (e) => {
+            const val = e.target.value / 100;
+            
+            // From #181a18 (RGB 24, 26, 24) to Cobalt Blue #0047ab (RGB 0, 71, 171)
+            const r = Math.round(24 + (0 - 24) * val);
+            const g = Math.round(26 + (71 - 26) * val);
+            const b = Math.round(24 + (171 - 24) * val);
+
+            document.body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+        });
+
+        // ------------------------------------
+        // Drag Logic ONLY for subtext.works
+        // ------------------------------------
+        const titleElem = document.getElementById('draggable-title');
+        let isDragging = false;
+        let startX, startY;
+        let currentX = 0, currentY = 0;
+
+        function startDrag(e) {
+            isDragging = true;
+
+            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+            startX = clientX - currentX;
+            startY = clientY - currentY;
+
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
         }
 
-        // Apply drag & paint to all draggable sections
-        document.querySelectorAll('.draggable').forEach(makeDraggable);
+        function drag(e) {
+            if (!isDragging) return;
+
+            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+            if (e.cancelable) e.preventDefault();
+
+            currentX = clientX - startX;
+            currentY = clientY - startY;
+
+            titleElem.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+
+        titleElem.addEventListener('mousedown', startDrag);
+        titleElem.addEventListener('touchstart', startDrag, { passive: false });
 
         // ------------------------------------
         // Exclusive Keyword Click Toggle Logic
         // ------------------------------------
         document.querySelectorAll('.keyword.clickable').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                if (!e.defaultPrevented) { // Only toggle if clicked, not dragged
-                    const castContainer = btn.nextElementSibling;
-                    if (castContainer && castContainer.classList.contains('cast-container')) {
-                        const isOpen = castContainer.classList.contains('active');
+            btn.addEventListener('click', () => {
+                const castContainer = btn.nextElementSibling;
+                if (castContainer && castContainer.classList.contains('cast-container')) {
+                    const isOpen = castContainer.classList.contains('active');
 
-                        // Close all currently open cast containers
-                        document.querySelectorAll('.cast-container.active').forEach(c => {
-                            c.classList.remove('active');
-                        });
+                    // Close all currently open cast containers
+                    document.querySelectorAll('.cast-container.active').forEach(c => {
+                        c.classList.remove('active');
+                    });
 
-                        // Open target container if it wasn't already open
-                        if (!isOpen) {
-                            castContainer.classList.add('active');
-                        }
+                    // Open target container if it wasn't already open
+                    if (!isOpen) {
+                        castContainer.classList.add('active');
                     }
                 }
             });
