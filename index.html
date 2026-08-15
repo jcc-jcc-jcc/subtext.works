@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>subtext.works</title>
     <style>
+        /* Color Palette (Dark Grey/Green & Yellow) */
         :root {
             --bg-color: #181a18;       /* Dark grey-green background */
             --text-color: #ebd15b;     /* Classic yellow text */
@@ -19,49 +20,131 @@
             font-display: swap;
         }
 
-        /* 2. Page Layout */
+        /* 2. Page Layout & Smooth Scrolling */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             background-color: var(--bg-color);
-            height: 100vh;
             width: 100vw;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;          /* Enables vertical scrolling */
             font-family: 'RadioGrotesk', Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
+        }
+
+        /* 3. First Fold Screen */
+        .first-fold {
+            height: 100vh;
+            width: 100%;
             position: relative;
         }
 
-        /* 3. Text & Link Styling */
-        a.site-title {
+        /* 4. Draggable Unit Container */
+        .logo-unit {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 12px;           /* Size 12 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            
+            cursor: grab;
+            user-select: none;
+            -webkit-user-drag: none;
+            touch-action: none;
+            
+            /* Fade-in Animation */
+            opacity: 0;
+            animation: fadeIn 2.5s ease-out forwards;
+        }
+
+        .logo-unit:active {
+            cursor: grabbing;
+        }
+
+        /* 5. Universal Text Styling (12px, Bold, Italic) */
+        a.site-title,
+        .keyword,
+        a.contact-link,
+        .projects-section span,
+        .projects-title {
+            font-size: 12px;
             font-weight: bold;
             font-style: italic;
             letter-spacing: -0.01em;
             text-transform: lowercase;
             color: var(--text-color);
             text-decoration: none;
-            cursor: grab;
-            user-select: none;
-            -webkit-user-drag: none;
-            touch-action: none;        /* Prevents screen scrolling on mobile while dragging */
-            
-            /* Fade-in Animation */
-            opacity: 0;
-            animation: fadeIn 2.5s ease-out forwards;
             transition: opacity 0.2s ease;
         }
 
-        a.site-title:active {
-            cursor: grabbing;
+        a.site-title {
+            margin-bottom: 4px;
+        }
+
+        .keyword {
+            opacity: 0.6;
+        }
+
+        a.contact-link {
+            margin-top: 8px;
+            opacity: 0.8;
+            cursor: pointer;
+        }
+
+        /* First fold hover interactions */
+        .logo-unit:hover a.site-title,
+        .logo-unit:hover .keyword,
+        .logo-unit:hover a.contact-link {
+            opacity: 1;
+        }
+
+        .logo-unit a:hover {
+            opacity: 0.5 !important;
+        }
+
+        /* 6. Second Fold Screen (Below First Scroll) */
+        .second-fold {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .projects-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .projects-title {
+            margin-bottom: 8px;
+            opacity: 0.6;
+        }
+
+        .projects-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .projects-list span {
+            opacity: 0.8;
         }
 
         @keyframes fadeIn {
@@ -72,7 +155,34 @@
 </head>
 <body>
 
-    <a href="mailto:contact@subtext.works" id="draggable" class="site-title">subtext.works</a>
+    <!-- First Fold -->
+    <div class="first-fold">
+        <div id="draggable" class="logo-unit">
+            <a href="mailto:contact@subtext.works" class="site-title">subtext.works</a>
+            <span class="keyword">strategic advisory</span>
+            <span class="keyword">growth mapping</span>
+            <span class="keyword">fractional ceo</span>
+            <a href="mailto:contact@subtext.works" class="contact-link">contact</a>
+        </div>
+    </div>
+
+    <!-- Second Fold (Below First Scroll) -->
+    <div class="second-fold">
+        <div class="projects-section">
+            <p class="projects-title">projects & partners include:</p>
+            <div class="projects-list">
+                <span>ark journal</span>
+                <span>bd barcelona</span>
+                <span>erria</span>
+                <span>evan kinori</span>
+                <span>everyday^</span>
+                <span>frama</span>
+                <span>frontrose</span>
+                <span>hosta family office</span>
+                <span>jb blunk estate</span>
+            </div>
+        </div>
+    </div>
 
     <script>
         const elem = document.getElementById('draggable');
@@ -91,10 +201,9 @@
             startY = clientY;
 
             const rect = elem.getBoundingClientRect();
-            initialLeft = rect.left;
-            initialTop = rect.top;
+            initialLeft = rect.left + window.scrollX;
+            initialTop = rect.top + window.scrollY;
 
-            // Convert initial CSS percentage alignment to fixed pixels on first drag
             elem.style.transform = 'none';
             elem.style.left = initialLeft + 'px';
             elem.style.top = initialTop + 'px';
@@ -114,7 +223,6 @@
             const deltaX = clientX - startX;
             const deltaY = clientY - startY;
 
-            // Check if user is actually dragging or just clicking
             if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
                 hasMoved = true;
             }
@@ -133,7 +241,6 @@
             document.removeEventListener('touchend', stopDrag);
         }
 
-        // Only open email if user clicked without dragging
         elem.addEventListener('click', (e) => {
             if (hasMoved) {
                 e.preventDefault();
