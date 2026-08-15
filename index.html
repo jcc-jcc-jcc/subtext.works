@@ -89,7 +89,8 @@
         .keyword,
         a.contact-link,
         .projects-title,
-        .projects-list span {
+        .projects-list span,
+        .cast-container span {
             font-size: 12px;
             font-weight: bold;
             font-style: italic;
@@ -108,6 +109,44 @@
             opacity: 0.6;
         }
 
+        .keyword.clickable {
+            cursor: pointer;
+        }
+
+        /* Interactive Keyword Row */
+        .keyword-wrapper {
+            position: relative;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Cast Container (Appears to the right) */
+        .cast-container {
+            position: absolute;
+            left: calc(100% + 16px);   /* Offsets to the right */
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            text-align: left;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .cast-container.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .cast-container span {
+            opacity: 0.8;
+        }
+
         a.contact-link {
             margin-top: 8px;
             opacity: 0.8;
@@ -123,6 +162,7 @@
             opacity: 1;
         }
 
+        .keyword.clickable:hover,
         a.contact-link:hover {
             opacity: 0.5 !important;
         }
@@ -162,7 +202,20 @@
     <div class="first-fold">
         <div class="draggable logo-unit">
             <span class="site-title">subtext.works</span>
-            <span class="keyword">strategic advisory</span>
+            
+            <div class="keyword-wrapper">
+                <span class="keyword clickable" id="strategic-advisory">strategic advisory</span>
+                
+                <!-- Cast 5 phrases to the right -->
+                <div class="cast-container" id="advisory-cast">
+                    <span>strategic vision and cultural change</span>
+                    <span>executional process design and management</span>
+                    <span>company organization restructuring</span>
+                    <span>inter and intra departments process design</span>
+                    <span>executive and key roles scouting</span>
+                </div>
+            </div>
+
             <span class="keyword">growth mapping</span>
             <span class="keyword">fractional ceo</span>
             <a href="mailto:contact@subtext.works" class="contact-link">contact</a>
@@ -252,7 +305,6 @@
                 elem.style.left = initialLeft + 'px';
                 elem.style.top = initialTop + 'px';
 
-                // Set starting point for paint stroke
                 const center = getElementCenter();
                 prevX = center.x;
                 prevY = center.y;
@@ -281,7 +333,6 @@
                 elem.style.left = (initialLeft + deltaX) + 'px';
                 elem.style.top = (initialTop + deltaY) + 'px';
 
-                // Paint trail following element center
                 const currentCenter = getElementCenter();
 
                 ctx.beginPath();
@@ -313,6 +364,18 @@
 
         // Apply drag & paint to all draggable sections
         document.querySelectorAll('.draggable').forEach(makeDraggable);
+
+        // ------------------------------------
+        // Strategic Advisory Click Toggle
+        // ------------------------------------
+        const advisoryBtn = document.getElementById('strategic-advisory');
+        const advisoryCast = document.getElementById('advisory-cast');
+
+        advisoryBtn.addEventListener('click', (e) => {
+            if (!e.defaultPrevented) { // Only trigger if it was a click, not a drag
+                advisoryCast.classList.toggle('active');
+            }
+        });
     </script>
 
 </body>
