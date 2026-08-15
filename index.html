@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>subtext.works</title>
     <style>
+        :root {
+            --bg-color: #181a18;       /* Dark grey-green background */
+            --text-color: #ebd15b;     /* Classic yellow text */
+        }
+
         /* 1. Registering the .woff file */
         @font-face {
             font-family: 'RadioGrotesk';
-            /* Matches your file extension exactly */
             src: url('PPRadioGrotesk-BoldItalic.woff') format('woff');
             font-weight: bold;
             font-style: italic;
@@ -23,40 +27,122 @@
         }
 
         body {
-            background-color: #ffffff;
-            color: #000000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: var(--bg-color);
             height: 100vh;
+            width: 100vw;
             overflow: hidden;
-            /* Using your custom font with a clean backup */
             font-family: 'RadioGrotesk', Helvetica, Arial, sans-serif;
-            -webkit-font-smoothing: antialiased; /* Makes the font look smoother on Macs */
+            -webkit-font-smoothing: antialiased;
+            position: relative;
         }
 
-        /* 3. Text Styling */
-        h1 {
-            font-size: 3rem;           /* Impactful size */
+        /* 3. Text & Link Styling */
+        a.site-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;           /* Size 12 */
             font-weight: bold;
             font-style: italic;
-            letter-spacing: -0.03em;    /* Tight spacing for Radio Grotesk */
-            text-transform: lowercase; 
+            letter-spacing: -0.01em;
+            text-transform: lowercase;
+            color: var(--text-color);
+            text-decoration: none;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-drag: none;
+            touch-action: none;        /* Prevents screen scrolling on mobile while dragging */
             
-            /* Subtle "Quiet" Animation */
+            /* Fade-in Animation */
             opacity: 0;
             animation: fadeIn 2.5s ease-out forwards;
+            transition: opacity 0.2s ease;
+        }
+
+        a.site-title:active {
+            cursor: grabbing;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; filter: blur(5px); } /* Starts slightly blurry and fades in */
+            from { opacity: 0; filter: blur(5px); }
             to { opacity: 1; filter: blur(0px); }
         }
     </style>
 </head>
 <body>
 
-    <h1>subtext.works</h1>
+    <a href="mailto:contact@subtext.works" id="draggable" class="site-title">subtext.works</a>
+
+    <script>
+        const elem = document.getElementById('draggable');
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+        let hasMoved = false;
+
+        function startDrag(e) {
+            isDragging = true;
+            hasMoved = false;
+
+            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+            startX = clientX;
+            startY = clientY;
+
+            const rect = elem.getBoundingClientRect();
+            initialLeft = rect.left;
+            initialTop = rect.top;
+
+            // Convert initial CSS percentage alignment to fixed pixels on first drag
+            elem.style.transform = 'none';
+            elem.style.left = initialLeft + 'px';
+            elem.style.top = initialTop + 'px';
+
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+
+            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+            const deltaX = clientX - startX;
+            const deltaY = clientY - startY;
+
+            // Check if user is actually dragging or just clicking
+            if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+                hasMoved = true;
+            }
+
+            if (e.cancelable) e.preventDefault();
+
+            elem.style.left = (initialLeft + deltaX) + 'px';
+            elem.style.top = (initialTop + deltaY) + 'px';
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+
+        // Only open email if user clicked without dragging
+        elem.addEventListener('click', (e) => {
+            if (hasMoved) {
+                e.preventDefault();
+            }
+        });
+
+        elem.addEventListener('mousedown', startDrag);
+        elem.addEventListener('touchstart', startDrag, { passive: false });
+    </script>
 
 </body>
 </html>
