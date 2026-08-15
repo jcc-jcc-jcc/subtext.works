@@ -38,17 +38,28 @@
             overflow-y: auto;          /* Enables vertical scrolling */
             font-family: 'RadioGrotesk', Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
+            position: relative;
         }
 
-        /* 3. Section Containers */
+        /* 3. Paint Canvas Overlay */
+        #paintCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;     /* Allows mouse/touch clicks to pass through */
+            z-index: 1;               /* Sits behind text, above background */
+        }
+
+        /* 4. Section Containers */
         .first-fold,
         .second-fold {
             height: 100vh;
             width: 100%;
             position: relative;
+            z-index: 2;
         }
 
-        /* 4. Draggable Containers */
+        /* 5. Draggable Containers */
         .draggable {
             position: absolute;
             top: 50%;
@@ -73,7 +84,7 @@
             cursor: grabbing;
         }
 
-        /* 5. Universal Text Styling (12px, Bold, Italic) */
+        /* 6. Universal Text Styling (12px, Bold, Italic) */
         .site-title,
         .keyword,
         a.contact-link,
@@ -103,7 +114,7 @@
             cursor: pointer;
         }
 
-        /* Hover interactions for draggable units */
+        /* Hover interactions */
         .draggable:hover .site-title,
         .draggable:hover .keyword,
         .draggable:hover a.contact-link,
@@ -144,6 +155,9 @@
 </head>
 <body>
 
+    <!-- Paint Trail Canvas -->
+    <canvas id="paintCanvas"></canvas>
+
     <!-- First Fold -->
     <div class="first-fold">
         <div class="draggable logo-unit">
@@ -174,10 +188,48 @@
     </div>
 
     <script>
+        // ------------------------------------
+        // Paint Canvas Setup
+        // ------------------------------------
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function initCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            const width = Math.max(document.documentElement.clientWidth, window.innerWidth);
+            const height = Math.max(document.documentElement.scrollHeight, window.innerHeight * 2);
+
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+
+            ctx.scale(dpr, dpr);
+            ctx.strokeStyle = '#ebd15b';  /* Yellow color */
+            ctx.lineWidth = 6;            /* Smooth brush width */
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        window.addEventListener('load', initCanvas);
+        window.addEventListener('resize', initCanvas);
+
+        // ------------------------------------
+        // Drag & Paint Logic
+        // ------------------------------------
         function makeDraggable(elem) {
             let isDragging = false;
             let startX, startY, initialLeft, initialTop;
+            let prevX, prevY;
             let hasMoved = false;
+
+            function getElementCenter() {
+                const rect = elem.getBoundingClientRect();
+                return {
+                    x: rect.left + window.scrollX + rect.width / 2,
+                    y: rect.top + window.scrollY + rect.height / 2
+                };
+            }
 
             function startDrag(e) {
                 isDragging = true;
@@ -199,6 +251,11 @@
                 elem.style.transform = 'none';
                 elem.style.left = initialLeft + 'px';
                 elem.style.top = initialTop + 'px';
+
+                // Set starting point for paint stroke
+                const center = getElementCenter();
+                prevX = center.x;
+                prevY = center.y;
 
                 document.addEventListener('mousemove', drag);
                 document.addEventListener('touchmove', drag, { passive: false });
@@ -223,6 +280,17 @@
 
                 elem.style.left = (initialLeft + deltaX) + 'px';
                 elem.style.top = (initialTop + deltaY) + 'px';
+
+                // Paint trail following element center
+                const currentCenter = getElementCenter();
+
+                ctx.beginPath();
+                ctx.moveTo(prevX, prevY);
+                ctx.lineTo(currentCenter.x, currentCenter.y);
+                ctx.stroke();
+
+                prevX = currentCenter.x;
+                prevY = currentCenter.y;
             }
 
             function stopDrag() {
@@ -243,7 +311,7 @@
             elem.addEventListener('touchstart', startDrag, { passive: false });
         }
 
-        // Apply drag functionality to all elements with class 'draggable'
+        // Apply drag & paint to all draggable sections
         document.querySelectorAll('.draggable').forEach(makeDraggable);
     </script>
 
