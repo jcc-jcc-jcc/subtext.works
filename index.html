@@ -40,15 +40,16 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 3. First Fold Screen */
-        .first-fold {
+        /* 3. Section Containers */
+        .first-fold,
+        .second-fold {
             height: 100vh;
             width: 100%;
             position: relative;
         }
 
-        /* 4. Draggable Unit Container */
-        .logo-unit {
+        /* 4. Draggable Containers */
+        .draggable {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -68,16 +69,16 @@
             animation: fadeIn 2.5s ease-out forwards;
         }
 
-        .logo-unit:active {
+        .draggable:active {
             cursor: grabbing;
         }
 
         /* 5. Universal Text Styling (12px, Bold, Italic) */
-        a.site-title,
+        .site-title,
         .keyword,
         a.contact-link,
-        .projects-section span,
-        .projects-title {
+        .projects-title,
+        .projects-list span {
             font-size: 12px;
             font-weight: bold;
             font-style: italic;
@@ -88,7 +89,7 @@
             transition: opacity 0.2s ease;
         }
 
-        a.site-title {
+        .site-title {
             margin-bottom: 4px;
         }
 
@@ -102,34 +103,22 @@
             cursor: pointer;
         }
 
-        /* First fold hover interactions */
-        .logo-unit:hover a.site-title,
-        .logo-unit:hover .keyword,
-        .logo-unit:hover a.contact-link {
+        /* Hover interactions for draggable units */
+        .draggable:hover .site-title,
+        .draggable:hover .keyword,
+        .draggable:hover a.contact-link,
+        .draggable:hover .projects-title,
+        .draggable:hover .projects-list span {
             opacity: 1;
         }
 
-        .logo-unit a:hover {
+        a.contact-link:hover {
             opacity: 0.5 !important;
         }
 
-        /* 6. Second Fold Screen (Below First Scroll) */
-        .second-fold {
-            min-height: 100vh;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 4rem 2rem;
-            text-align: center;
-        }
-
+        /* Projects Section Specifics */
         .projects-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
+            text-align: center;
         }
 
         .projects-title {
@@ -157,8 +146,8 @@
 
     <!-- First Fold -->
     <div class="first-fold">
-        <div id="draggable" class="logo-unit">
-            <a href="mailto:contact@subtext.works" class="site-title">subtext.works</a>
+        <div class="draggable logo-unit">
+            <span class="site-title">subtext.works</span>
             <span class="keyword">strategic advisory</span>
             <span class="keyword">growth mapping</span>
             <span class="keyword">fractional ceo</span>
@@ -168,7 +157,7 @@
 
     <!-- Second Fold (Below First Scroll) -->
     <div class="second-fold">
-        <div class="projects-section">
+        <div class="draggable projects-section">
             <p class="projects-title">projects & partners include:</p>
             <div class="projects-list">
                 <span>ark journal</span>
@@ -185,70 +174,77 @@
     </div>
 
     <script>
-        const elem = document.getElementById('draggable');
-        let isDragging = false;
-        let startX, startY, initialLeft, initialTop;
-        let hasMoved = false;
+        function makeDraggable(elem) {
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+            let hasMoved = false;
 
-        function startDrag(e) {
-            isDragging = true;
-            hasMoved = false;
+            function startDrag(e) {
+                isDragging = true;
+                hasMoved = false;
 
-            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+                const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
 
-            startX = clientX;
-            startY = clientY;
+                startX = clientX;
+                startY = clientY;
 
-            const rect = elem.getBoundingClientRect();
-            initialLeft = rect.left + window.scrollX;
-            initialTop = rect.top + window.scrollY;
+                const parent = elem.offsetParent || document.body;
+                const parentRect = parent.getBoundingClientRect();
+                const elemRect = elem.getBoundingClientRect();
 
-            elem.style.transform = 'none';
-            elem.style.left = initialLeft + 'px';
-            elem.style.top = initialTop + 'px';
+                initialLeft = elemRect.left - parentRect.left;
+                initialTop = elemRect.top - parentRect.top;
 
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('touchmove', drag, { passive: false });
-            document.addEventListener('mouseup', stopDrag);
-            document.addEventListener('touchend', stopDrag);
-        }
+                elem.style.transform = 'none';
+                elem.style.left = initialLeft + 'px';
+                elem.style.top = initialTop + 'px';
 
-        function drag(e) {
-            if (!isDragging) return;
-
-            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-
-            const deltaX = clientX - startX;
-            const deltaY = clientY - startY;
-
-            if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
-                hasMoved = true;
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', drag, { passive: false });
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchend', stopDrag);
             }
 
-            if (e.cancelable) e.preventDefault();
+            function drag(e) {
+                if (!isDragging) return;
 
-            elem.style.left = (initialLeft + deltaX) + 'px';
-            elem.style.top = (initialTop + deltaY) + 'px';
-        }
+                const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
 
-        function stopDrag() {
-            isDragging = false;
-            document.removeEventListener('mousemove', drag);
-            document.removeEventListener('touchmove', drag);
-            document.removeEventListener('mouseup', stopDrag);
-            document.removeEventListener('touchend', stopDrag);
-        }
+                const deltaX = clientX - startX;
+                const deltaY = clientY - startY;
 
-        elem.addEventListener('click', (e) => {
-            if (hasMoved) {
-                e.preventDefault();
+                if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+                    hasMoved = true;
+                }
+
+                if (e.cancelable) e.preventDefault();
+
+                elem.style.left = (initialLeft + deltaX) + 'px';
+                elem.style.top = (initialTop + deltaY) + 'px';
             }
-        });
 
-        elem.addEventListener('mousedown', startDrag);
-        elem.addEventListener('touchstart', startDrag, { passive: false });
+            function stopDrag() {
+                isDragging = false;
+                document.removeEventListener('mousemove', drag);
+                document.removeEventListener('touchmove', drag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
+            }
+
+            elem.addEventListener('click', (e) => {
+                if (hasMoved) {
+                    e.preventDefault();
+                }
+            });
+
+            elem.addEventListener('mousedown', startDrag);
+            elem.addEventListener('touchstart', startDrag, { passive: false });
+        }
+
+        // Apply drag functionality to all elements with class 'draggable'
+        document.querySelectorAll('.draggable').forEach(makeDraggable);
     </script>
 
 </body>
