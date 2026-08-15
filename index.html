@@ -89,7 +89,8 @@
         .keyword,
         a.contact-link,
         .projects-title,
-        .projects-list span {
+        .projects-list span,
+        .cast-container span {
             font-size: 12px;
             font-weight: bold;
             font-style: italic;
@@ -108,6 +109,44 @@
             opacity: 0.6;
         }
 
+        .keyword.clickable {
+            cursor: pointer;
+        }
+
+        /* Interactive Keyword Row Wrapper */
+        .keyword-wrapper {
+            position: relative;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Cast Containers (Positioned 80px to the right) */
+        .cast-container {
+            position: absolute;
+            left: calc(100% + 80px);   /* 80px offset to the right */
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;                 /* Vertical spacing between cast items */
+            text-align: left;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .cast-container.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .cast-container span {
+            opacity: 0.8;
+        }
+
         a.contact-link {
             margin-top: 8px;
             opacity: 0.8;
@@ -123,6 +162,7 @@
             opacity: 1;
         }
 
+        .keyword.clickable:hover,
         a.contact-link:hover {
             opacity: 0.5 !important;
         }
@@ -162,9 +202,41 @@
     <div class="first-fold">
         <div class="draggable logo-unit">
             <span class="site-title">subtext.works</span>
-            <span class="keyword">strategic advisory</span>
-            <span class="keyword">growth mapping</span>
-            <span class="keyword">fractional ceo</span>
+            
+            <!-- 1. Strategic Advisory -->
+            <div class="keyword-wrapper">
+                <span class="keyword clickable">- strategic advisory</span>
+                <div class="cast-container">
+                    <span>strategic vision & cultural change</span>
+                    <span>brand & business positioning</span>
+                    <span>executive & key-leader recruitment</span>
+                </div>
+            </div>
+
+            <!-- 2. Fractional CEO -->
+            <div class="keyword-wrapper">
+                <span class="keyword clickable">- fractional ceo</span>
+                <div class="cast-container">
+                    <span>executive leadership & team building</span>
+                    <span>commercial & financial structure and oversight</span>
+                    <span>organizational structure & development</span>
+                    <span>value chain strategy & development</span>
+                    <span>stakeholder & investor relations</span>
+                </div>
+            </div>
+
+            <!-- 3. Growth & Investing -->
+            <div class="keyword-wrapper">
+                <span class="keyword clickable">- growth & investing</span>
+                <div class="cast-container">
+                    <span>new markets & category opportunities</span>
+                    <span>new sources of value</span>
+                    <span>strategic partnerships & collaborations</span>
+                    <span>investor matching</span>
+                    <span>investment & capital strategy</span>
+                </div>
+            </div>
+
             <a href="mailto:contact@subtext.works" class="contact-link">contact</a>
         </div>
     </div>
@@ -252,7 +324,6 @@
                 elem.style.left = initialLeft + 'px';
                 elem.style.top = initialTop + 'px';
 
-                // Set starting point for paint stroke
                 const center = getElementCenter();
                 prevX = center.x;
                 prevY = center.y;
@@ -281,7 +352,6 @@
                 elem.style.left = (initialLeft + deltaX) + 'px';
                 elem.style.top = (initialTop + deltaY) + 'px';
 
-                // Paint trail following element center
                 const currentCenter = getElementCenter();
 
                 ctx.beginPath();
@@ -313,6 +383,30 @@
 
         // Apply drag & paint to all draggable sections
         document.querySelectorAll('.draggable').forEach(makeDraggable);
+
+        // ------------------------------------
+        // Exclusive Keyword Click Toggle Logic
+        // ------------------------------------
+        document.querySelectorAll('.keyword.clickable').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!e.defaultPrevented) { // Only toggle if clicked, not dragged
+                    const castContainer = btn.nextElementSibling;
+                    if (castContainer && castContainer.classList.contains('cast-container')) {
+                        const isOpen = castContainer.classList.contains('active');
+
+                        // Close all currently open cast containers
+                        document.querySelectorAll('.cast-container.active').forEach(c => {
+                            c.classList.remove('active');
+                        });
+
+                        // Open target container if it wasn't already open
+                        if (!isOpen) {
+                            castContainer.classList.add('active');
+                        }
+                    }
+                }
+            });
+        });
     </script>
 
 </body>
