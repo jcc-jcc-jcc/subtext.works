@@ -113,7 +113,7 @@
             cursor: pointer;
         }
 
-        /* Interactive Keyword Row */
+        /* Interactive Keyword Row Wrapper */
         .keyword-wrapper {
             position: relative;
             display: inline-flex;
@@ -121,14 +121,14 @@
             align-items: center;
         }
 
-        /* Cast Container (Appears 5x further away & 5x further apart) */
+        /* Cast Containers (Positioned to the right of each keyword) */
         .cast-container {
             position: absolute;
-            left: calc(100% + 80px);   /* 5x further away (was 16px, now 80px) */
+            left: calc(100% + 80px);   /* 80px offset to the right */
             top: 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;                 /* 5x further apart vertically (was 2px, now 10px) */
+            gap: 10px;                 /* Vertical spacing between cast items */
             text-align: left;
             white-space: nowrap;
             opacity: 0;
@@ -203,21 +203,42 @@
         <div class="draggable logo-unit">
             <span class="site-title">subtext.works</span>
             
+            <!-- 1. Strategic Advisory -->
             <div class="keyword-wrapper">
-                <span class="keyword clickable" id="strategic-advisory">strategic advisory</span>
-                
-                <!-- Cast 5 phrases to the right -->
-                <div class="cast-container" id="advisory-cast">
-                    <span>strategic vision and cultural change</span>
-                    <span>executional process design and management</span>
-                    <span>company organization restructuring</span>
-                    <span>inter and intra departments process design</span>
-                    <span>executive and key roles scouting</span>
+                <span class="keyword clickable">strategic advisory</span>
+                <div class="cast-container">
+                    <span>strategic vision & culture</span>
+                    <span>strategic execution & operational management</span>
+                    <span>organizational restructuring</span>
+                    <span>cross-functional process design</span>
+                    <span>executive & key-role recruitment</span>
                 </div>
             </div>
 
-            <span class="keyword">growth mapping</span>
-            <span class="keyword">fractional ceo</span>
+            <!-- 2. Fractional CEO -->
+            <div class="keyword-wrapper">
+                <span class="keyword clickable">fractional ceo</span>
+                <div class="cast-container">
+                    <span>strategic direction & decision-making</span>
+                    <span>commercial & financial management</span>
+                    <span>organizational development & team leadership</span>
+                    <span>operational management & execution</span>
+                    <span>stakeholder & investor relations</span>
+                </div>
+            </div>
+
+            <!-- 3. Growth Mapping & Investing -->
+            <div class="keyword-wrapper">
+                <span class="keyword clickable">growth mapping & investing</span>
+                <div class="cast-container">
+                    <span>brand & business positioning</span>
+                    <span>new markets & category opportunities</span>
+                    <span>product, service & business development</span>
+                    <span>strategic partnerships & collaborations</span>
+                    <span>investment & capital strategy</span>
+                </div>
+            </div>
+
             <a href="mailto:contact@subtext.works" class="contact-link">contact</a>
         </div>
     </div>
@@ -366,15 +387,17 @@
         document.querySelectorAll('.draggable').forEach(makeDraggable);
 
         // ------------------------------------
-        // Strategic Advisory Click Toggle
+        // Keyword Click Toggle Logic
         // ------------------------------------
-        const advisoryBtn = document.getElementById('strategic-advisory');
-        const advisoryCast = document.getElementById('advisory-cast');
-
-        advisoryBtn.addEventListener('click', (e) => {
-            if (!e.defaultPrevented) { // Only trigger if it was a click, not a drag
-                advisoryCast.classList.toggle('active');
-            }
+        document.querySelectorAll('.keyword.clickable').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!e.defaultPrevented) { // Only toggle if clicked, not dragged
+                    const castContainer = btn.nextElementSibling;
+                    if (castContainer && castContainer.classList.contains('cast-container')) {
+                        castContainer.classList.toggle('active');
+                    }
+                }
+            });
         });
     </script>
 
