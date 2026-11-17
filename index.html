@@ -106,7 +106,8 @@
         /* ONLY subtext.works is draggable */
         .site-title {
             font-size: 13px;
-            margin-bottom: 4px;
+            font-style: normal;
+            margin-bottom: 10px;
             cursor: grab;
             user-select: none;
             -webkit-user-drag: none;
@@ -304,7 +305,11 @@
         .chip:hover { opacity: 1; transform: translateY(-2px); }
 
         /* On phones the chips sit at the bottom of the page instead of floating over the list */
-        @media (max-width: 560px) { .palette { position: absolute; } }
+        @media (max-width: 560px) {
+            /* Use the visible screen height (svh) so the shapes sit above the browser's bottom bar */
+            .page { min-height: 100svh; padding-top: calc(50svh - 60px); padding-bottom: 150px; }
+            .palette { position: absolute; left: auto; right: 16px; bottom: 64px; justify-content: flex-end; flex-wrap: wrap; }
+        }
         .chip[aria-pressed="true"] { opacity: 1; }
         .chip:focus-visible { outline: 1px solid var(--text-color); outline-offset: 1px; }
 
@@ -327,6 +332,11 @@
         .shape-tri { filter: drop-shadow(0 0 0.6px color-mix(in srgb, var(--text-color) 60%, transparent)); }
         .shape-tri[aria-pressed="true"] { filter: drop-shadow(0 0 0.8px var(--text-color)) drop-shadow(0 0 0.4px var(--text-color)); }
         .shape-dot     i { width: 9px;  height: 9px;  border-radius: 50%; }
+        .shape-arch    i { width: 12px; height: 13px; border-radius: 6px 6px 0 0; }   /* Bofill arch */
+        .shape-half    i { width: 14px; height: 7px;  border-radius: 0 0 7px 7px; }
+        .shape-triup   i { width: 13px; height: 12px; clip-path: polygon(50% 0, 100% 100%, 0 100%); box-shadow: none; }
+        .shape-triup { filter: drop-shadow(0 0 0.6px color-mix(in srgb, var(--text-color) 60%, transparent)); }
+        .shape-triup[aria-pressed="true"] { filter: drop-shadow(0 0 0.8px var(--text-color)) drop-shadow(0 0 0.4px var(--text-color)); }
 
         /* Gentle crossfade when the palette changes */
         ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.45s; }
@@ -487,13 +497,13 @@
 
     <!-- Fixed Bottom Right Palette Chips -->
     <div class="palette" role="group" aria-label="Colour palette">
-        <button class="chip shape-circle"  type="button" data-palette="murallaRed"    aria-label="Muralla red"        style="--c:#b8322c"><i></i></button>
-        <button class="chip shape-square"  type="button" data-palette="murallaPink"   aria-label="Muralla pink"       style="--c:#e8a5a0"><i></i></button>
-        <button class="chip shape-diamond" type="button" data-palette="murallaIndigo" aria-label="Muralla indigo"     style="--c:#2b3a8c"><i></i></button>
-        <button class="chip shape-tall"    type="button" data-palette="waldenTerra"   aria-label="Walden terracotta"  style="--c:#954626"><i></i></button>
-        <button class="chip shape-dot"     type="button" data-palette="waldenTeal"    aria-label="Walden teal"        style="--c:#284f5f"><i></i></button>
-        <button class="chip shape-tilt"    type="button" data-palette="xanadu"        aria-label="Xanadú"             style="--c:#3e5838"><i></i></button>
-        <button class="chip shape-tri"     type="button" data-palette="fabrica"       aria-label="La Fábrica"         style="--c:#d6d0c4"><i></i></button>
+        <button class="chip shape-circle"  type="button" data-palette="ochre"         aria-label="Ochre"              style="--c:#d9a21b"><i></i></button>
+        <button class="chip shape-tall"    type="button" data-palette="waldenTeal"    aria-label="Walden teal"        style="--c:#284f5f"><i></i></button>
+        <button class="chip shape-half"    type="button" data-palette="murallaPink"   aria-label="Muralla pink"       style="--c:#e8a5a0"><i></i></button>
+        <button class="chip shape-diamond" type="button" data-palette="xanadu"        aria-label="Xanadú"             style="--c:#3e5838"><i></i></button>
+        <button class="chip shape-tilt"    type="button" data-palette="fabrica"       aria-label="La Fábrica"         style="--c:#d6d0c4"><i></i></button>
+        <button class="chip shape-arch"    type="button" data-palette="murallaRed"    aria-label="Muralla red"        style="--c:#b8322c"><i></i></button>
+        <button class="chip shape-triup"   type="button" data-palette="murallaIndigo" aria-label="Muralla indigo"     style="--c:#2b3a8c"><i></i></button>
     </div>
 
     <script>
@@ -506,10 +516,10 @@
             murallaRed:    { bg: '#b8322c', text: '#fbe3dc', lines: '#fbe3dc', mark: '#b9d4ef', scheme: 'dark'  },  // La Muralla Roja, outer walls
             murallaPink:   { bg: '#e8a5a0', text: '#3a1a5c', lines: '#3a1a5c', mark: '#8e1f1a', scheme: 'light' },  // La Muralla Roja, sunlit stairs
             murallaIndigo: { bg: '#2b3a8c', text: '#f3b6c0', lines: '#6fa8dc', mark: '#6fa8dc', scheme: 'dark'  },  // La Muralla Roja, courtyards
-            waldenTerra:   { bg: '#954626', text: '#f6e6d4', lines: '#f6e6d4', mark: '#a6d3d6', scheme: 'dark'  },  // Walden 7, facade tiles
             waldenTeal:    { bg: '#284f5f', text: '#f4c09c', lines: '#d8b24a', mark: '#6b2a33', scheme: 'dark'  },  // Walden 7, tiled interior
             xanadu:        { bg: '#3e5838', text: '#f2c9a8', lines: '#f2c9a8', mark: '#f0a070', scheme: 'dark'  },  // Xanadú, Calpe
-            fabrica:       { bg: '#d6d0c4', text: '#2f3a2c', lines: '#954626', mark: '#954626', scheme: 'light' }   // La Fábrica, Sant Just Desvern
+            fabrica:       { bg: '#d6d0c4', text: '#2f3a2c', lines: '#954626', mark: '#954626', scheme: 'light' },  // La Fábrica, Sant Just Desvern
+            ochre:         { bg: '#d9a21b', text: '#2a1452', lines: '#2a1452', mark: '#6e1410', scheme: 'light' }   // sun-baked ochre render
         };
         const chips = document.querySelectorAll('.chip');
 
