@@ -7,17 +7,35 @@
     <style>
         /* Color Palette (Dark Grey/Green & Yellow) */
         :root {
-            --bg-color: #181a18;       /* Dark grey-green background */
-            --text-color: #ebd15b;     /* Classic yellow text */
+            /* Palette drawn from Bofill's tiled courtyard (Walden 7) */
+            /* Default palette (teal). The chips bottom-right swap these four values. */
+            --bg-color: #284f5f;       /* background */
+            --text-color: #ebd15b;     /* text */
+            --accent: #d8b24a;         /* lines between engagements */
+            --burgundy: #6b2a33;       /* arrow and +/x */
+            color-scheme: dark;
         }
 
-        /* 1. Registering the .woff file */
+        /* 1. Registering the four Radio Grotesk cuts (one family, four styles) */
         @font-face {
             font-family: 'RadioGrotesk';
-            src: url('PPRadioGrotesk-BoldItalic.woff') format('woff');
-            font-weight: bold;
-            font-style: italic;
-            font-display: swap;
+            src: url('fonts/PPRadioGrotesk-Regular.woff2') format('woff2');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'RadioGrotesk';
+            src: url('fonts/PPRadioGrotesk-RegularItalic.woff2') format('woff2');
+            font-weight: normal; font-style: italic; font-display: swap;
+        }
+        @font-face {
+            font-family: 'RadioGrotesk';
+            src: url('fonts/PPRadioGrotesk-Bold.woff2') format('woff2');
+            font-weight: bold; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'RadioGrotesk';
+            src: url('fonts/PPRadioGrotesk-BoldItalic.woff2') format('woff2');
+            font-weight: bold; font-style: italic; font-display: swap;
         }
 
         /* 2. Page Layout & Smooth Scrolling */
@@ -42,25 +60,26 @@
         }
 
         /* 3. Section Containers */
-        .first-fold,
-        .second-fold {
-            height: 100vh;
+        /* One page, no fold: the title group sits just above the middle of the
+           screen and the drop-downs open downwards from there */
+        .page {
+            min-height: 100vh;
             width: 100%;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: calc(50vh - 60px) 20px 96px;
+            gap: 14px;
         }
 
         /* 4. Centered Layout Units */
-        .logo-unit,
-        .projects-section {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .logo-unit {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 2px;
-            
+
             /* Fade-in Animation */
             opacity: 0;
             animation: fadeIn 2.5s ease-out forwards;
@@ -71,7 +90,9 @@
         .keyword,
         a.contact-link,
         .projects-title,
-        .projects-list span {
+        .about,
+        .index,
+        .index a {
             font-size: 12px;
             font-weight: bold;
             font-style: italic;
@@ -84,6 +105,7 @@
 
         /* ONLY subtext.works is draggable */
         .site-title {
+            font-size: 13px;
             margin-bottom: 4px;
             cursor: grab;
             user-select: none;
@@ -111,9 +133,7 @@
         /* Hover interactions */
         .logo-unit:hover .site-title,
         .logo-unit:hover .keyword,
-        .logo-unit:hover a.contact-link,
-        .projects-section:hover .projects-title,
-        .projects-section:hover .projects-list span {
+        .logo-unit:hover a.contact-link {
             opacity: 1;
         }
 
@@ -121,25 +141,90 @@
             opacity: 0.5 !important;
         }
 
-        /* Projects Section Specifics */
+        /* ------------------------------------
+           INDEX (second fold)
+           ------------------------------------ */
         .projects-section {
+            width: 100%;
+            max-width: 580px;
+            opacity: 0;
+            animation: fadeIn 2.5s ease-out forwards;
+        }
+
+        .about {
+            max-width: 440px;
+            margin: 0 auto;
+            text-align: center;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .about p { opacity: 0.8; }
+        .about .about-sub { opacity: 0.5; }
+        .about:hover p { opacity: 1; }
+
+        .projects-title {
+            margin-bottom: 0;
+            opacity: 0.6;
             text-align: center;
         }
 
-        .projects-title {
-            margin-bottom: 8px;
-            opacity: 0.6;
+        .index-row {
+            display: grid;
+            grid-template-columns: 96px minmax(0, 0.9fr) minmax(0, 1.3fr);
+            column-gap: 14px;
+            padding: 5px 0;
+            border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
         }
 
-        .projects-list {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
+        .index-row > span { min-width: 0; }
+
+        .index-head {
+            opacity: 0.4;
+            border-bottom-color: color-mix(in srgb, var(--accent) 50%, transparent);
         }
 
-        .projects-list span {
+        .index-body .index-row {
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
+        }
+
+        .index-body .index-row .sub { opacity: 0.6; transition: opacity 0.2s ease; }
+
+        /* Hovering the index dims everything; the row under the cursor lights up */
+        .index-body:hover .index-row { opacity: 0.35; }
+        .index-body .index-row:hover,
+        .index-body .index-row:hover .sub { opacity: 1; }
+
+        .num { font-variant-numeric: tabular-nums; }
+        .tbc { opacity: 0.45; }
+
+        .index-foot {
+            margin-top: 18px;
+            text-align: center;
             opacity: 0.8;
         }
+
+        .index-foot a:hover { opacity: 0.5; }
+
+        /* Phones: each entry becomes a small stacked block */
+        @media (max-width: 560px) {
+            .index-head { display: none; }
+            .index-row {
+                grid-template-columns: 68px minmax(0, 1fr);
+                grid-template-areas: "yr name" ". role";
+                row-gap: 1px;
+                padding: 9px 0;
+            }
+            .index-row .nm { grid-area: name; }
+            .index-row .yr { grid-area: yr; opacity: 0.6; white-space: nowrap; font-size: 10px; }
+            .index-row .role { grid-area: role; opacity: 0.6; }
+            .index-row .sub { grid-area: sub; }
+            .index-body:hover .index-row { opacity: 0.8; }
+        }
+
 
         /* 6. Minimalist Scroll Indicator Arrow */
         .scroll-indicator {
@@ -147,15 +232,24 @@
             bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
-            color: var(--text-color);
-            font-size: 12px;
-            font-style: italic;
-            opacity: 0.5;
+            padding: 12px;
+            line-height: 0;
+            opacity: 1;
             cursor: pointer;
             transition: opacity 0.2s ease;
             animation: bounce 2s infinite;
             user-select: none;
             z-index: 10;
+        }
+
+        /* Arrow drawn as a small cut-paper triangle, like the palette chips */
+        .scroll-indicator i {
+            display: block;
+            width: 13px;
+            height: 11px;
+            background: var(--burgundy);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            filter: drop-shadow(0 0 0.5px color-mix(in srgb, var(--text-color) 40%, transparent));
         }
 
         .scroll-indicator:hover {
@@ -166,9 +260,9 @@
         .copyright {
             position: absolute;
             bottom: 20px;
-            left: 20px;                /* Positioned on the bottom left */
+            left: 20px;
             z-index: 10;
-            font-size: 8px;            /* Very small font size */
+            font-size: 8px;
             font-weight: bold;
             font-style: italic;
             letter-spacing: -0.01em;
@@ -183,50 +277,59 @@
             opacity: 1;
         }
 
-        /* 8. Bottom Right Color Slider Styling */
-        .color-slider-container {
+        /* 8. Bottom Right Palette Chips (shapes from the collage) */
+        .palette {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 18px;
+            right: 18px;
             z-index: 10;
             display: flex;
             align-items: center;
-            opacity: 0.4;
-            transition: opacity 0.2s ease;
+            gap: 2px;
         }
 
-        .color-slider-container:hover {
-            opacity: 1;
-        }
-
-        input[type=range].color-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 80px;
-            height: 2px;
-            background: var(--text-color);
-            outline: none;
+        .chip {
+            width: 22px;
+            height: 22px;
+            padding: 0;
+            border: 0;
+            background: none;
+            display: grid;
+            place-items: center;
             cursor: pointer;
+            opacity: 0.85;
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
-        input[type=range].color-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-color);
-            cursor: pointer;
+        .chip:hover { opacity: 1; transform: translateY(-2px); }
+
+        /* On phones the chips sit at the bottom of the page instead of floating over the list */
+        @media (max-width: 560px) { .palette { position: absolute; } }
+        .chip[aria-pressed="true"] { opacity: 1; }
+        .chip:focus-visible { outline: 1px solid var(--text-color); outline-offset: 1px; }
+
+        .chip i {
+            display: block;
+            background: var(--c);
+            box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-color) 35%, transparent);
         }
 
-        input[type=range].color-slider::-moz-range-thumb {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-color);
-            border: none;
-            cursor: pointer;
-        }
+        .chip[aria-pressed="true"] i { box-shadow: 0 0 0 1.5px var(--text-color); }
+
+        .shape-square  i { width: 10px; height: 10px; }
+        .shape-tall    i { width: 7px;  height: 13px; }
+        .shape-circle  i { width: 12px; height: 12px; border-radius: 50%; }
+        .shape-tilt    i { width: 6px;  height: 13px; transform: rotate(35deg); }
+        .shape-diamond i { width: 9px;  height: 9px;  transform: rotate(45deg); }
+        .shape-bar     i { width: 14px; height: 6px; }
+        .shape-tilt2   i { width: 6px;  height: 13px; transform: rotate(-25deg); }
+        .shape-tri     i { width: 13px; height: 12px; clip-path: polygon(0 0, 100% 0, 50% 100%); box-shadow: none; }
+        .shape-tri { filter: drop-shadow(0 0 0.6px color-mix(in srgb, var(--text-color) 60%, transparent)); }
+        .shape-tri[aria-pressed="true"] { filter: drop-shadow(0 0 0.8px var(--text-color)) drop-shadow(0 0 0.4px var(--text-color)); }
+        .shape-dot     i { width: 9px;  height: 9px;  border-radius: 50%; }
+
+        /* Gentle crossfade when the palette changes */
+        ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.45s; }
 
         @keyframes fadeIn {
             from { opacity: 0; filter: blur(5px); }
@@ -244,77 +347,214 @@
                 transform: translateX(-50%) translateY(2px);
             }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            .logo-unit, .projects-section { animation: none; opacity: 1; }
+            .scroll-indicator { animation: none; }
+        }
+
+        /* ------------------------------------
+           TYPE ROLES — variation within one family
+           bold italic  = names & signature (subtext.works, project names, contact)
+           bold upright = the statement
+           regular      = running text & data
+           regular italic = labels & quiet notes
+           ------------------------------------ */
+        a.contact-link,
+        .projects-title,
+        .index-head,
+        .copyright { font-weight: normal; font-style: italic; }
+
+        .about p { font-weight: normal; font-style: normal; line-height: 1.55; }
+        .about p.lead {
+            font-weight: bold; font-style: normal;
+            font-size: 22px; line-height: 1.15; letter-spacing: -0.025em; text-wrap: balance;
+            opacity: 1;
+        }
+
+        .index-body .index-row { font-weight: normal; font-style: normal; }
+        .index-row .nm { font-weight: bold; font-style: italic; }
+        .index-row .role { font-style: italic; }
+        .index-row .yr { letter-spacing: 0.02em; }
+
+        .index-foot a { font-weight: bold; font-style: italic; }
+
+        /* Drop-downs (about / engagements) */
+        .drop + .drop { margin-top: 10px; }
+        .contact-row { text-align: center; }
+        .contact-row a.contact-link { display: inline-block; margin: 0; padding: 4px 8px; }
+        .drop-toggle {
+            display: block; margin: 0 auto;
+            background: none; border: 0; padding: 4px 8px;
+            color: var(--text-color); cursor: pointer;
+            text-transform: lowercase; letter-spacing: -0.01em;
+        }
+        .drop-toggle:hover, .drop-toggle[aria-expanded="true"] { opacity: 1; }
+        .drop-toggle:focus-visible { outline: 1px solid var(--text-color); outline-offset: 2px; }
+        .drop-toggle .sign { display: inline-block; margin-left: 2px; color: var(--burgundy); font-weight: bold; transition: transform 0.4s ease; }
+        .drop-toggle[aria-expanded="true"] .sign { transform: rotate(45deg); }
+        .drop-panel {
+            display: grid; grid-template-rows: 0fr;
+            opacity: 0; filter: blur(4px);
+            transition: grid-template-rows 0.6s ease, opacity 0.6s ease, filter 0.6s ease;
+        }
+        .drop-panel.open { grid-template-rows: 1fr; opacity: 1; filter: blur(0); }
+        .drop-inner { overflow: hidden; min-height: 0; }
+        .drop-inner > .about, .drop-inner > .index { padding: 10px 0 36px; }
+        @media (prefers-reduced-motion: reduce) { .drop-panel, .drop-toggle .sign { transition: none; } }
+
+        /* Engagement list: all Regular, 12px */
+        .index-body .index-row,
+        .index-body .index-row .nm,
+        .index-body .index-row .role,
+        .index-body .index-row .yr { font-size: 12px; font-weight: normal; font-style: normal; }
+
+        /* Engagement names link out */
+        .index-body .index-row .nm a {
+            font: inherit; letter-spacing: inherit; color: inherit;
+            text-decoration: none; opacity: 1;
+        }
+        .index-body .index-row .nm a:hover,
+        .index-body .index-row .nm a:focus-visible {
+            text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; outline: none;
+        }
+
+        /* Legibility: readable text at full strength in every palette.
+           Hierarchy comes from weight and italics, not from fading the colour. */
+        .about p,
+        .about:hover p,
+        a.contact-link,
+        .projects-title,
+        .drop-toggle,
+        .index-body .index-row,
+        .index-row .yr,
+        .index-row .role { opacity: 1; }
+        .drop-toggle:hover { text-decoration: underline; text-underline-offset: 3px; }
+        .index-body:hover .index-row { opacity: 0.55; }
+        .index-body .index-row:hover { opacity: 1; }
+        .copyright { opacity: 1; }
+        @media (max-width: 560px) { .index-body:hover .index-row { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <!-- First Fold -->
-    <div class="first-fold" id="top">
+    <!-- One page: title, contact, then about and engagements -->
+    <div class="page" id="top">
         <div class="logo-unit">
             <!-- Only subtext.works is draggable -->
             <span class="site-title" id="draggable-title">subtext.works</span>
-            
-            <span class="keyword">fractional ceo</span>
-            <span class="keyword">strategic advisory</span>
-            <span class="keyword">growth & investment</span>
-
-            <a href="mailto:contact@subtext.works" class="contact-link">contact</a>
         </div>
 
-        <!-- Minimalist Scroll Down Indicator -->
-        <div class="scroll-indicator" id="scrollArrow">↓</div>
-    </div>
-
-    <!-- Second Fold (Below First Scroll) -->
-    <div class="second-fold" id="projects">
         <div class="projects-section">
-            <p class="projects-title">projects & partners include:</p>
-            <div class="projects-list">
-                <span>ark journal</span>
-                <span>bd barcelona</span>
-                <span>erria</span>
-                <span>evan kinori</span>
-                <span>everyday^</span>
-                <span>frama</span>
-                <span>frontrose</span>
-                <span>hosta family office</span>
-                <span>jb blunk estate</span>
+            <div class="drop">
+            <button class="projects-title drop-toggle" type="button" aria-expanded="false" aria-controls="aboutPanel">about <span class="sign" aria-hidden="true">+</span></button>
+            <div class="drop-panel" id="aboutPanel"><div class="drop-inner">
+            <div class="about">
+                <p>Subtext Works is an advisory practice for creative companies and brands. Based in New York City, we work with founders, executives, boards and family offices across Europe and the US, providing strategic counsel, taking on defined projects and stepping into fractional leadership roles. Our work focuses on turning ambitious creative visions into companies built to last.</p>
+                <p>Subtext Works was founded by Johan Christian Chen. As CEO of Frama from 2016 to 2024, he led its growth into a global brand spanning furniture, lighting, body care and hospitality. Johan is also co-owner of the design publication Ark Journal.</p>
+            </div>
+            </div></div>
+            </div>
+
+            <div class="drop">
+            <button class="projects-title drop-toggle" type="button" aria-expanded="false" aria-controls="engagementsPanel">engagements <span class="sign" aria-hidden="true">+</span></button>
+            <div class="drop-panel" id="engagementsPanel"><div class="drop-inner">
+
+            <div class="index">
+
+                <div class="index-body">
+                    <div class="index-row"><span class="yr num">2026–today</span><span class="nm"><a href="https://frontrose.global/" target="_blank" rel="noopener">frontrose</a></span><span class="role">founder advisory</span></div>
+                    <div class="index-row"><span class="yr num">2026–today</span><span class="nm"><a href="https://everyday.io/" target="_blank" rel="noopener">everyday^</a></span><span class="role">investment, founder advisory</span></div>
+                    <div class="index-row"><span class="yr num">2025–today</span><span class="nm"><a href="https://gallerisonja.com/" target="_blank" rel="noopener">hosta family office</a></span><span class="role">ownership advisory</span></div>
+                    <div class="index-row"><span class="yr num">2025–today</span><span class="nm"><a href="https://www.bdbarcelona.com/" target="_blank" rel="noopener">bd barcelona</a></span><span class="role">executive and ownership advisory</span></div>
+                    <div class="index-row"><span class="yr num">2024–today</span><span class="nm"><a href="https://www.ark-journal.com/" target="_blank" rel="noopener">ark journal</a></span><span class="role">investment, board advisory</span></div>
+                    <div class="index-row"><span class="yr num">2024–today</span><span class="nm"><a href="https://evankinori.com/" target="_blank" rel="noopener">evan kinori</a></span><span class="role">fractional leadership, board advisory</span></div>
+                    <div class="index-row"><span class="yr num">2024–today</span><span class="nm"><a href="https://www.tom-adam.com/" target="_blank" rel="noopener">tom àdam</a></span><span class="role">board advisory</span></div>
+                    <div class="index-row"><span class="yr num">2016–2024</span><span class="nm"><a href="https://framacph.com/" target="_blank" rel="noopener">frama</a></span><span class="role">CEO &amp; partner</span></div>
+                </div>
+            </div>
+            </div></div>
+            </div>
+
+            <div class="drop contact-row">
+                <a href="mailto:contact@subtext.works" class="contact-link">contact</a>
             </div>
         </div>
 
-        <!-- Copyright Notice on Second Scroll (Bottom Left) -->
+        <!-- Copyright Notice (Bottom Left) -->
         <div class="copyright">&copy; 2026, all rights reserved</div>
     </div>
 
-    <!-- Fixed Bottom Right Background Color Slider -->
-    <div class="color-slider-container">
-        <input type="range" id="bgSlider" class="color-slider" min="0" max="100" value="0">
+    <!-- Fixed Bottom Right Palette Chips -->
+    <div class="palette" role="group" aria-label="Colour palette">
+        <button class="chip shape-dot"     type="button" data-palette="teal"     aria-label="Teal"         style="--c:#284f5f"><i></i></button>
+        <button class="chip shape-square"  type="button" data-palette="paper"    aria-label="Paper"        style="--c:#f7f6f0"><i></i></button>
+        <button class="chip shape-tall"    type="button" data-palette="green"    aria-label="Dark green"   style="--c:#0b2e1a"><i></i></button>
+        <button class="chip shape-circle"  type="button" data-palette="red"      aria-label="Red"          style="--c:#c43c0a"><i></i></button>
+        <button class="chip shape-tilt"    type="button" data-palette="blue"     aria-label="Blue"         style="--c:#1a86c8"><i></i></button>
+        <button class="chip shape-diamond" type="button" data-palette="navy"     aria-label="Navy"         style="--c:#0e0b4a"><i></i></button>
+        <button class="chip shape-bar"     type="button" data-palette="burgundy" aria-label="Burgundy"     style="--c:#6e0f08"><i></i></button>
+        <button class="chip shape-tilt2"   type="button" data-palette="yellow"   aria-label="Yellow"       style="--c:#ffc800"><i></i></button>
+        <button class="chip shape-tri"     type="button" data-palette="sage"     aria-label="Sage"         style="--c:#7a9a82"><i></i></button>
     </div>
 
     <script>
         // ------------------------------------
-        // Smooth Scroll Arrow Action
+        // Palettes: click a chip to flick the whole site to new colours
+        // bg = background, text = text, lines = engagement lines, mark = arrow and +/x
         // ------------------------------------
-        document.getElementById('scrollArrow').addEventListener('click', () => {
-            window.scrollTo({
-                top: window.innerHeight,
-                behavior: 'smooth'
+        const palettes = {
+            teal:     { bg: '#284f5f', text: '#ebd15b', lines: '#d8b24a', mark: '#6b2a33', scheme: 'dark'  },
+            paper:    { bg: '#f7f6f0', text: '#0e0b4a', lines: '#c43c0a', mark: '#c43c0a', scheme: 'light' },
+            green:    { bg: '#0b2e1a', text: '#ffc800', lines: '#7a9a82', mark: '#ffaa00', scheme: 'dark'  },
+            red:      { bg: '#c43c0a', text: '#fffcf5', lines: '#fffcf5', mark: '#0e0b4a', scheme: 'dark'  },
+            blue:     { bg: '#1a86c8', text: '#07052a', lines: '#07052a', mark: '#f7f6f0', scheme: 'light' },
+            navy:     { bg: '#0e0b4a', text: '#ffaa00', lines: '#7a9a82', mark: '#1a86c8', scheme: 'dark'  },
+            burgundy: { bg: '#6e0f08', text: '#dcc8b6', lines: '#dcc8b6', mark: '#ffc800', scheme: 'dark'  },
+            yellow:   { bg: '#ffc800', text: '#0b2e1a', lines: '#0b2e1a', mark: '#c43c0a', scheme: 'light' },
+            sage:     { bg: '#7a9a82', text: '#06180e', lines: '#06180e', mark: '#6e0f08', scheme: 'light' }
+        };
+        const chips = document.querySelectorAll('.chip');
+
+        function paint(name) {
+            const p = palettes[name] || palettes.teal;
+            const root = document.documentElement.style;
+            root.setProperty('--bg-color', p.bg);
+            root.setProperty('--text-color', p.text);
+            root.setProperty('--accent', p.lines);
+            root.setProperty('--burgundy', p.mark);
+            root.setProperty('color-scheme', p.scheme);
+            chips.forEach((c) => c.setAttribute('aria-pressed', c.dataset.palette === name ? 'true' : 'false'));
+            try { localStorage.setItem('subtext-palette', name); } catch (e) {}
+        }
+
+        function applyPalette(name) {
+            if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.startViewTransition(() => paint(name));
+            } else {
+                paint(name);
+            }
+        }
+
+        chips.forEach((c) => c.addEventListener('click', () => applyPalette(c.dataset.palette)));
+
+
+        // Each visit lands on a random palette (never the same one as last time)
+        let last = null;
+        try { last = localStorage.getItem('subtext-palette'); } catch (e) {}
+        const names = Object.keys(palettes).filter((n) => n !== last);
+        paint(names[Math.floor(Math.random() * names.length)]);
+
+        // ------------------------------------
+        // Drop-downs: about / engagements
+        // ------------------------------------
+        document.querySelectorAll('.drop-toggle').forEach((btn) => {
+            const panel = document.getElementById(btn.getAttribute('aria-controls'));
+            btn.addEventListener('click', () => {
+                const open = btn.getAttribute('aria-expanded') !== 'true';
+                btn.setAttribute('aria-expanded', open);
+                panel.classList.toggle('open', open);
             });
-        });
-
-        // ------------------------------------
-        // Background Color Gradient Interpolation
-        // ------------------------------------
-        const slider = document.getElementById('bgSlider');
-        slider.addEventListener('input', (e) => {
-            const val = e.target.value / 100;
-            
-            // From #181a18 (RGB 24, 26, 24) to Cobalt Blue #0047ab (RGB 0, 71, 171)
-            const r = Math.round(24 + (0 - 24) * val);
-            const g = Math.round(26 + (71 - 26) * val);
-            const b = Math.round(24 + (171 - 24) * val);
-
-            document.body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
         });
 
         // ------------------------------------
