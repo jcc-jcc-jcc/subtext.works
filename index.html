@@ -7,7 +7,7 @@
     <style>
         /* Color Palette (Dark Grey/Green & Yellow) */
         :root {
-            /* Palette drawn from Bofill's tiled courtyard (Walden 7) */
+            /* Palettes drawn from Ricardo Bofill's buildings */
             /* Default palette (teal). The chips bottom-right swap these four values. */
             --bg-color: #284f5f;       /* background */
             --text-color: #ebd15b;     /* text */
@@ -487,15 +487,13 @@
 
     <!-- Fixed Bottom Right Palette Chips -->
     <div class="palette" role="group" aria-label="Colour palette">
-        <button class="chip shape-dot"     type="button" data-palette="teal"     aria-label="Teal"         style="--c:#284f5f"><i></i></button>
-        <button class="chip shape-square"  type="button" data-palette="paper"    aria-label="Paper"        style="--c:#f7f6f0"><i></i></button>
-        <button class="chip shape-tall"    type="button" data-palette="green"    aria-label="Dark green"   style="--c:#0b2e1a"><i></i></button>
-        <button class="chip shape-circle"  type="button" data-palette="red"      aria-label="Red"          style="--c:#c43c0a"><i></i></button>
-        <button class="chip shape-tilt"    type="button" data-palette="blue"     aria-label="Blue"         style="--c:#1a86c8"><i></i></button>
-        <button class="chip shape-diamond" type="button" data-palette="navy"     aria-label="Navy"         style="--c:#0e0b4a"><i></i></button>
-        <button class="chip shape-bar"     type="button" data-palette="burgundy" aria-label="Burgundy"     style="--c:#6e0f08"><i></i></button>
-        <button class="chip shape-tilt2"   type="button" data-palette="yellow"   aria-label="Yellow"       style="--c:#ffc800"><i></i></button>
-        <button class="chip shape-tri"     type="button" data-palette="sage"     aria-label="Sage"         style="--c:#7a9a82"><i></i></button>
+        <button class="chip shape-circle"  type="button" data-palette="murallaRed"    aria-label="Muralla red"        style="--c:#b8322c"><i></i></button>
+        <button class="chip shape-square"  type="button" data-palette="murallaPink"   aria-label="Muralla pink"       style="--c:#e8a5a0"><i></i></button>
+        <button class="chip shape-diamond" type="button" data-palette="murallaIndigo" aria-label="Muralla indigo"     style="--c:#2b3a8c"><i></i></button>
+        <button class="chip shape-tall"    type="button" data-palette="waldenTerra"   aria-label="Walden terracotta"  style="--c:#954626"><i></i></button>
+        <button class="chip shape-dot"     type="button" data-palette="waldenTeal"    aria-label="Walden teal"        style="--c:#284f5f"><i></i></button>
+        <button class="chip shape-tilt"    type="button" data-palette="xanadu"        aria-label="Xanadú"             style="--c:#3e5838"><i></i></button>
+        <button class="chip shape-tri"     type="button" data-palette="fabrica"       aria-label="La Fábrica"         style="--c:#d6d0c4"><i></i></button>
     </div>
 
     <script>
@@ -503,21 +501,20 @@
         // Palettes: click a chip to flick the whole site to new colours
         // bg = background, text = text, lines = engagement lines, mark = arrow and +/x
         // ------------------------------------
+        // Bofill-inspired palettes (colours approximated from photographs of the buildings)
         const palettes = {
-            teal:     { bg: '#284f5f', text: '#ebd15b', lines: '#d8b24a', mark: '#6b2a33', scheme: 'dark'  },
-            paper:    { bg: '#f7f6f0', text: '#0e0b4a', lines: '#c43c0a', mark: '#c43c0a', scheme: 'light' },
-            green:    { bg: '#0b2e1a', text: '#ffc800', lines: '#7a9a82', mark: '#ffaa00', scheme: 'dark'  },
-            red:      { bg: '#c43c0a', text: '#fffcf5', lines: '#fffcf5', mark: '#0e0b4a', scheme: 'dark'  },
-            blue:     { bg: '#1a86c8', text: '#07052a', lines: '#07052a', mark: '#f7f6f0', scheme: 'light' },
-            navy:     { bg: '#0e0b4a', text: '#ffaa00', lines: '#7a9a82', mark: '#1a86c8', scheme: 'dark'  },
-            burgundy: { bg: '#6e0f08', text: '#dcc8b6', lines: '#dcc8b6', mark: '#ffc800', scheme: 'dark'  },
-            yellow:   { bg: '#ffc800', text: '#0b2e1a', lines: '#0b2e1a', mark: '#c43c0a', scheme: 'light' },
-            sage:     { bg: '#7a9a82', text: '#06180e', lines: '#06180e', mark: '#6e0f08', scheme: 'light' }
+            murallaRed:    { bg: '#b8322c', text: '#fbe3dc', lines: '#fbe3dc', mark: '#b9d4ef', scheme: 'dark'  },  // La Muralla Roja, outer walls
+            murallaPink:   { bg: '#e8a5a0', text: '#3a1a5c', lines: '#3a1a5c', mark: '#8e1f1a', scheme: 'light' },  // La Muralla Roja, sunlit stairs
+            murallaIndigo: { bg: '#2b3a8c', text: '#f3b6c0', lines: '#6fa8dc', mark: '#6fa8dc', scheme: 'dark'  },  // La Muralla Roja, courtyards
+            waldenTerra:   { bg: '#954626', text: '#f6e6d4', lines: '#f6e6d4', mark: '#a6d3d6', scheme: 'dark'  },  // Walden 7, facade tiles
+            waldenTeal:    { bg: '#284f5f', text: '#f4c09c', lines: '#d8b24a', mark: '#6b2a33', scheme: 'dark'  },  // Walden 7, tiled interior
+            xanadu:        { bg: '#3e5838', text: '#f2c9a8', lines: '#f2c9a8', mark: '#f0a070', scheme: 'dark'  },  // Xanadú, Calpe
+            fabrica:       { bg: '#d6d0c4', text: '#2f3a2c', lines: '#954626', mark: '#954626', scheme: 'light' }   // La Fábrica, Sant Just Desvern
         };
         const chips = document.querySelectorAll('.chip');
 
         function paint(name) {
-            const p = palettes[name] || palettes.teal;
+            const p = palettes[name] || palettes.waldenTeal;
             const root = document.documentElement.style;
             root.setProperty('--bg-color', p.bg);
             root.setProperty('--text-color', p.text);
